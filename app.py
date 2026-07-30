@@ -316,10 +316,10 @@ elif page == "ผู้พัฒนา":
     
     with col2:
         st.subheader("รายละเอียด")
-        st.write("**รหัสนักศึกษา:** 6XXXXXXXXX")
-        st.write("**ชื่อ-นามสกุล:** นาย/นางสาว XXXXXXXXXX")
-        st.write("**หมู่เรียน:** หมู่เรียนที่ XX")
-        st.write("**อีเมล:** your.email@example.com")
+        st.write("**รหัสนักศึกษา:** 664245017")
+        st.write("**ชื่อ-นามสกุล:** นาย เกริกยศ โกาลกุล")
+        st.write("**หมู่เรียน:** หมู่เรียนที่ 66/43")
+        st.write("**อีเมล:** kerkyod@gmail.com")
     
     st.markdown("---")
     st.subheader("เกี่ยวกับโปรเจกต์")
