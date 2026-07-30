@@ -51,7 +51,7 @@ def load_models():
 models, scaler, label_encoders, target_encoder, feature_columns = load_models()
 
 # แสดงข้อมูลผู้พัฒนา
-elif page == "👨‍💻 ข้อมูลผู้พัฒนา":
+elif page == " ข้อมูลผู้พัฒนา":
     st.markdown('<p class="main-header">💻 ข้อมูลผู้พัฒนา</p>', unsafe_allow_html=True)
     st.markdown("---")
     
