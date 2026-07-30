@@ -51,23 +51,58 @@ def load_models():
 models, scaler, label_encoders, target_encoder, feature_columns = load_models()
 
 # แสดงข้อมูลผู้พัฒนา
-st.sidebar.header("👨‍💻 ข้อมูลผู้พัฒนา")
-st.sidebar.info("""
-**รหัสนักศึกษา:** 66424017
-
-**ชื่อ-นามสกุล:** นาย เกริกยศ โกลากุล
-
-**หมู่เรียน:** 66243
-""")
-
-st.sidebar.markdown("---")
-st.sidebar.header(" โมเดลที่ใช้")
-st.sidebar.write("1. K-nearest neighbor")
-st.sidebar.write("2. Decision Tree")
-st.sidebar.write("3. SVM")
-st.sidebar.write("4. K-mean")
-st.sidebar.write("5. Regression")
-st.sidebar.write("6. Ensemble (Random Forest)")
+elif page == "👨‍💻 ข้อมูลผู้พัฒนา":
+    st.markdown('<p class="main-header">💻 ข้อมูลผู้พัฒนา</p>', unsafe_allow_html=True)
+    st.markdown("---")
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.subheader("📷 รูปผู้พัฒนา")
+        # แสดงรูปภาพ - เลือกวิธีใดวิธีหนึ่งด้านล่าง
+        
+        # วิธีที่ 1: ใช้ไฟล์รูปภาพในโฟลเดอร์เดียวกัน (แนะนำ)
+        try:
+            st.image("profile.jpg",  # เปลี่ยนเป็นชื่อไฟล์รูปของคุณ
+                     caption="รูปผู้พัฒนา", 
+                     use_container_width=True)
+        except:
+            st.warning("️ ไม่พบไฟล์รูปภาพ กรุณาอัปโหลดไฟล์ profile.jpg")
+            st.image("https://via.placeholder.com/300x300.png?text=Your+Photo", 
+                     caption="รูปชั่วคราว", 
+                     use_container_width=True)
+        
+    with col2:
+        st.subheader("📋 รายละเอียดผู้พัฒนา")
+        st.markdown(f"""
+        **🆔 รหัสนักศึกษา:** 6XXXXXXXXX
+        
+        **👤 ชื่อ-นามสกุล:** นาย/นางสาว XXXXXXXXXX
+        
+        **👥 หมู่เรียน:** หมู่เรียนที่ XX
+        
+        **📧 อีเมล:** your.email@example.com
+        
+        ** ภาควิชา/คณะ:** ระบุคณะของคุณ
+        """)
+        
+    st.markdown("---")
+    st.subheader("📝 เกี่ยวกับโปรเจกต์นี้")
+    st.info("""
+    **ชื่อโปรเจกต์:** ระบบทำนายคุณภาพการนอนหลับจากพฤติกรรมการใช้หน้าจอ
+    
+    **วัตถุประสงค์:** 
+    - ศึกษาความสัมพันธ์ระหว่างพฤติกรรมการใช้หน้าจอและคุณภาพการนอน
+    - พัฒนาโมเดล Machine Learning สำหรับทำนายคุณภาพการนอน
+    
+    **โมเดลที่ใช้:**
+    1. K-nearest neighbor (KNN)
+    2. Decision Tree
+    3. SVM (Support Vector Machine)
+    4. K-mean Clustering
+    5. Logistic Regression
+    6. Ensemble (Random Forest)
+    """)
 
 # ส่วนกรอกข้อมูล
 st.header("📝 กรอกข้อมูลเพื่อทำนาย")
