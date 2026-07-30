@@ -88,12 +88,12 @@ with col1:
     stress = st.slider("คะแนนความเครียด (1-10)", 1, 10, 5)
 
 with col2:
-    sleep_quality_score = st.slider("คะแนนคุณภาพการนอน自评 (1-10)", 1, 10, 5)
+    sleep_quality_score = st.slider("คะแนนคุณภาพการนอน (1-10)", 1, 10, 5)
     daytime_fatigue = st.slider("คะแนนความเหนื่อยล้าตอนกลางวัน (1-10)", 1, 10, 5)
     news_apps = st.number_input("จำนวนแอปข่าวที่ใช้", min_value=0, max_value=10, value=2)
     phone_checks = st.number_input("จำนวนครั้งที่เช็คโทรศัพท์กลางดึก", min_value=0, max_value=10, value=3)
     exercise = st.number_input("เวลาออกกำลังกายต่อวัน (นาที)", min_value=0, max_value=150, value=30)
-    days_detox = st.number_input("จำนวนวันตั้งแต่最后一次 digital detox", min_value=0, max_value=365, value=30)
+    days_detox = st.number_input("จำนวนวันตั้งแต่ digital detox", min_value=0, max_value=365, value=30)
     weekly_sleep_debt = st.number_input("หนี้การนอนต่อสัปดาห์ (ชั่วโมง)", min_value=0.0, max_value=30.0, value=5.0)
     gender = st.selectbox("เพศ", ["Male", "Female", "Prefer not to say"])
     occupation = st.selectbox("สถานะการทำงาน", ["Student", "Employed Full-time", "Employed Part-time", "Unemployed"])
