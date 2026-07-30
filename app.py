@@ -53,11 +53,11 @@ models, scaler, label_encoders, target_encoder, feature_columns = load_models()
 # แสดงข้อมูลผู้พัฒนา
 st.sidebar.header("👨‍💻 ข้อมูลผู้พัฒนา")
 st.sidebar.info("""
-**รหัสนักศึกษา:** 6XXXXXXXXX
+**รหัสนักศึกษา:** 66424017
 
-**ชื่อ-นามสกุล:** นาย/นางสาว XXXXXXXXXX
+**ชื่อ-นามสกุล:** นาย เกริกยศ โกลากุล
 
-**หมู่เรียน:** หมู่เรียนที่ XX
+**หมู่เรียน:** 66243
 """)
 
 st.sidebar.markdown("---")
