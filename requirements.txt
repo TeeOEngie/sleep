@@ -4,6 +4,6 @@ matplotlib
 seaborn
 streamlit
 plotly
-scikit-learn==1.6.1
-joblib==1.5.3
-scipy==1.16.3
+scikit-learn
+joblib
+scipy
