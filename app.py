@@ -4,30 +4,34 @@ import numpy as np
 import pickle
 import json
 
+# ตั้งค่าหน้าเว็บ
 st.set_page_config(
-    page_title="Sleep Quality Prediction",
-    page_icon="zzz",
+    page_title="ระบบทำนายคุณภาพการนอนหลับ",
+    page_icon="😴",
     layout="wide"
 )
 
-st.title("Sleep Quality Prediction System")
+# หัวข้อหลัก
+st.title("ระบบทำนายคุณภาพการนอนหลับ")
+st.markdown("---")
 
+# ฟังก์ชันโหลดโมเดล
 @st.cache_resource
 def load_models():
     models = {}
     try:
         with open('knn_model.pkl', 'rb') as f:
-            models['KNN'] = pickle.load(f)
+            models['K-nearest neighbor'] = pickle.load(f)
         with open('decision_tree_model.pkl', 'rb') as f:
             models['Decision Tree'] = pickle.load(f)
         with open('svm_model.pkl', 'rb') as f:
             models['SVM'] = pickle.load(f)
         with open('kmeans_model.pkl', 'rb') as f:
-            models['K-Means'] = pickle.load(f)
+            models['K-mean'] = pickle.load(f)
         with open('logistic_regression_model.pkl', 'rb') as f:
             models['Regression'] = pickle.load(f)
         with open('random_forest_model.pkl', 'rb') as f:
-            models['Random Forest'] = pickle.load(f)
+            models['Ensemble (Random Forest)'] = pickle.load(f)
         
         with open('scaler.pkl', 'rb') as f:
             scaler = pickle.load(f)
@@ -40,63 +44,114 @@ def load_models():
         
         return models, scaler, label_encoders, target_encoder, feature_columns
     except Exception as e:
-        st.error(f"Error loading models: {e}")
+        st.error(f"เกิดข้อผิดพลาดในการโหลดโมเดล: {e}")
         return None, None, None, None, None
 
 models, scaler, label_encoders, target_encoder, feature_columns = load_models()
 
+# เมนูด้านข้าง
+st.sidebar.title("เมนูหลัก")
 page = st.sidebar.radio(
-    "Menu",
-    ["Home", "Prediction", "Models Info", "Developer"]
+    "เลือกหน้า",
+    ["หน้าหลัก", "ทำนายผล", "ข้อมูลโมเดล", "ผู้พัฒนา"]
 )
 
-if page == "Home":
-    st.header("Home")
-    st.write("Welcome to Sleep Quality Prediction System")
-    st.write("This system uses 6 machine learning models to predict sleep quality.")
+# ==========================================
+# หน้า 1: หน้าหลัก
+# ==========================================
+if page == "หน้าหลัก":
+    st.header("ยินดีต้อนรับสู่ระบบทำนายคุณภาพการนอนหลับ")
     
-    st.subheader("Models Used:")
-    st.write("1. K-Nearest Neighbor (KNN)")
+    st.subheader("เกี่ยวกับโปรเจกต์นี้")
+    st.write("""
+    โปรเจกต์นี้พัฒนาขึ้นเพื่อศึกษาความสัมพันธ์ระหว่างพฤติกรรมการใช้หน้าจอ
+    (โดยเฉพาะการ doomscroll) กับคุณภาพการนอนหลับ โดยใช้ Machine Learning 
+    จำนวน 6 โมเดลในการทำนาย
+    """)
+    
+    st.subheader("โมเดลที่ใช้ในระบบ")
+    st.write("1. K-nearest neighbor (KNN)")
     st.write("2. Decision Tree")
     st.write("3. SVM (Support Vector Machine)")
-    st.write("4. K-Means Clustering")
-    st.write("5. Logistic Regression")
-    st.write("6. Random Forest (Ensemble)")
+    st.write("4. K-mean Clustering")
+    st.write("5. Regression (Logistic Regression)")
+    st.write("6. Ensemble (Random Forest)")
+    
+    st.subheader("วิธีใช้งาน")
+    st.write("1. ไปที่เมนู 'ทำนายผล' ด้านซ้าย")
+    st.write("2. กรอกข้อมูลเกี่ยวกับพฤติกรรมการนอนและการใช้หน้าจอ")
+    st.write("3. กดปุ่ม 'ทำนายผล'")
+    st.write("4. ดูผลลัพธ์จากโมเดลทั้ง 6 ตัว")
 
-elif page == "Prediction":
-    st.header("Prediction")
+# ==========================================
+# หน้า 2: ทำนายผล
+# ==========================================
+elif page == "ทำนายผล":
+    st.header("กรอกข้อมูลเพื่อทำนายคุณภาพการนอนหลับ")
+    st.markdown("---")
     
     col1, col2 = st.columns(2)
     
     with col1:
-        age = st.number_input("Age", min_value=15, max_value=60, value=25)
-        bedtime_screen = st.number_input("Bedtime Screen Time (minutes)", min_value=0, max_value=300, value=60)
-        total_screen = st.number_input("Total Daily Screen Time (hours)", min_value=0.0, max_value=15.0, value=5.0)
-        doomscroll_sessions = st.number_input("Doomscroll Sessions per Night", min_value=0, max_value=10, value=2)
-        avg_doomscroll = st.number_input("Avg Doomscroll Session (minutes)", min_value=0, max_value=100, value=20)
-        sleep_hours = st.number_input("Sleep Hours per Night", min_value=4.0, max_value=10.0, value=7.0)
-        sleep_latency = st.number_input("Sleep Latency (minutes)", min_value=0, max_value=100, value=20)
-        night_wakeups = st.number_input("Night Wakeups", min_value=0, max_value=10, value=2)
-        caffeine = st.number_input("Caffeine Intake (mg/day)", min_value=0, max_value=600, value=100)
-        anxiety = st.slider("Anxiety Score (1-10)", 1, 10, 5)
-        stress = st.slider("Stress Score (1-10)", 1, 10, 5)
+        st.subheader("ข้อมูลส่วนตัว")
+        age = st.number_input("อายุ", min_value=15, max_value=60, value=25)
+        gender = st.selectbox("เพศ", ["Male", "Female", "Prefer not to say"])
+        occupation = st.selectbox("สถานะการทำงาน", 
+                                  ["Student", "Employed Full-time", "Employed Part-time", "Unemployed"])
+        country = st.selectbox("ประเทศ/ภูมิภาค", 
+                              ["United States", "India", "United Kingdom", "Canada", "Australia", 
+                               "Germany", "Brazil", "Philippines", "Nigeria", "UAE"])
     
     with col2:
-        sleep_quality_score = st.slider("Self-rated Sleep Quality (1-10)", 1, 10, 5)
-        daytime_fatigue = st.slider("Daytime Fatigue (1-10)", 1, 10, 5)
-        news_apps = st.number_input("Number of News Apps", min_value=0, max_value=10, value=2)
-        phone_checks = st.number_input("Phone Checks per Night", min_value=0, max_value=10, value=3)
-        exercise = st.number_input("Exercise (minutes/day)", min_value=0, max_value=150, value=30)
-        days_detox = st.number_input("Days Since Digital Detox", min_value=0, max_value=365, value=30)
-        weekly_sleep_debt = st.number_input("Weekly Sleep Debt (hours)", min_value=0.0, max_value=30.0, value=5.0)
-        gender = st.selectbox("Gender", ["Male", "Female", "Prefer not to say"])
-        occupation = st.selectbox("Occupation", ["Student", "Employed Full-time", "Employed Part-time", "Unemployed"])
-        country = st.selectbox("Country/Region", ["United States", "India", "United Kingdom", "Canada", "Australia", "Germany", "Brazil", "Philippines", "Nigeria", "UAE"])
-        primary_device = st.selectbox("Primary Device at Night", ["Smartphone", "Tablet", "Laptop", "TV"])
-        bedtime_routine = st.selectbox("Bedtime Routine", ["No Fixed Routine", "Reading", "Meditation/Journaling", "Scrolling Social Media", "Watching Videos"])
+        st.subheader("พฤติกรรมการใช้หน้าจอ")
+        bedtime_screen = st.number_input("เวลาใช้หน้าจอก่อนนอน (นาที)", min_value=0, max_value=300, value=60)
+        total_screen = st.number_input("เวลาใช้หน้าจอรวมต่อวัน (ชั่วโมง)", min_value=0.0, max_value=15.0, value=5.0)
+        doomscroll_sessions = st.number_input("จำนวนครั้งที่ doomscroll ต่อคืน", min_value=0, max_value=10, value=2)
+        avg_doomscroll = st.number_input("เวลาเฉลี่ยต่อ session doomscroll (นาที)", min_value=0, max_value=100, value=20)
     
-    if st.button("Predict"):
+    st.markdown("---")
+    
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.subheader("ข้อมูลการนอน")
+        sleep_hours = st.number_input("จำนวนชั่วโมงการนอนต่อคืน", min_value=4.0, max_value=10.0, value=7.0)
+        sleep_latency = st.number_input("เวลาที่ใช้กว่าจะหลับ (นาที)", min_value=0, max_value=100, value=20)
+        night_wakeups = st.number_input("จำนวนครั้งที่ตื่นกลางดึก", min_value=0, max_value=10, value=2)
+        weekly_sleep_debt = st.number_input("หนี้การนอนต่อสัปดาห์ (ชั่วโมง)", min_value=0.0, max_value=30.0, value=5.0)
+    
+    with col4:
+        st.subheader("ไลฟ์สไตล์")
+        caffeine = st.number_input("ปริมาณคาเฟอีนต่อวัน (mg)", min_value=0, max_value=600, value=100)
+        exercise = st.number_input("เวลาออกกำลังกายต่อวัน (นาที)", min_value=0, max_value=150, value=30)
+        days_detox = st.number_input("จำนวนวันตั้งแต่ digital detox", min_value=0, max_value=365, value=30)
+        phone_checks = st.number_input("จำนวนครั้งที่เช็คโทรศัพท์กลางดึก", min_value=0, max_value=10, value=3)
+    
+    st.markdown("---")
+    
+    col5, col6 = st.columns(2)
+    
+    with col5:
+        st.subheader("สุขภาพจิต")
+        anxiety = st.slider("คะแนนความวิตกกังวล (1-10)", 1, 10, 5)
+        stress = st.slider("คะแนนความเครียด (1-10)", 1, 10, 5)
+        sleep_quality_score = st.slider("คะแนนคุณภาพการนอน (1-10)", 1, 10, 5)
+        daytime_fatigue = st.slider("คะแนนความเหนื่อยล้าตอนกลางวัน (1-10)", 1, 10, 5)
+    
+    with col6:
+        st.subheader("การใช้เทคโนโลยี")
+        news_apps = st.number_input("จำนวนแอปข่าวที่ใช้", min_value=0, max_value=10, value=2)
+        primary_device = st.selectbox("อุปกรณ์หลักที่ใช้ก่อนนอน", 
+                                     ["Smartphone", "Tablet", "Laptop", "TV"])
+        bedtime_routine = st.selectbox("กิจวัตรก่อนนอน", 
+                                      ["No Fixed Routine", "Reading", "Meditation/Journaling", 
+                                       "Scrolling Social Media", "Watching Videos"])
+    
+    # ปุ่มทำนาย
+    st.markdown("---")
+    if st.button("ทำนายผล", type="primary"):
         if models is not None:
+            # เตรียมข้อมูล
             input_data = {
                 'age': age,
                 'bedtime_screen_time_minutes': bedtime_screen,
@@ -125,6 +180,7 @@ elif page == "Prediction":
             
             input_df = pd.DataFrame([input_data])
             
+            # Encode ตัวแปรหมวดหมู่
             for col in label_encoders.keys():
                 if col in input_df.columns:
                     le = label_encoders[col]
@@ -132,6 +188,7 @@ elif page == "Prediction":
                         lambda x: le.transform([x])[0] if x in le.classes_ else 0
                     )
             
+            # ตรวจสอบคอลัมน์
             for col in feature_columns:
                 if col not in input_df.columns:
                     input_df[col] = 0
@@ -139,75 +196,138 @@ elif page == "Prediction":
             X_input = input_df[feature_columns].fillna(0)
             X_input_scaled = scaler.transform(X_input)
             
-            st.subheader("Prediction Results")
+            # ทำนายผล
+            st.subheader("ผลลัพธ์การทำนาย")
+            st.markdown("---")
             
             results = {}
             
-            pred = models['KNN'].predict(X_input_scaled)[0]
-            results['1. K-Nearest Neighbor'] = target_encoder.inverse_transform([pred])[0]
+            # 1. K-nearest neighbor
+            pred = models['K-nearest neighbor'].predict(X_input_scaled)[0]
+            results['1. K-nearest neighbor'] = target_encoder.inverse_transform([pred])[0]
             
+            # 2. Decision Tree
             pred = models['Decision Tree'].predict(X_input)[0]
             results['2. Decision Tree'] = target_encoder.inverse_transform([pred])[0]
             
+            # 3. SVM
             pred = models['SVM'].predict(X_input_scaled)[0]
             results['3. SVM'] = target_encoder.inverse_transform([pred])[0]
             
-            cluster = models['K-Means'].predict(X_input_scaled)[0]
-            results['4. K-Means'] = f"Cluster {cluster}"
+            # 4. K-mean (Clustering)
+            cluster = models['K-mean'].predict(X_input_scaled)[0]
+            results['4. K-mean'] = f"Cluster {cluster} (Unsupervised Learning)"
             
+            # 5. Regression
             pred = models['Regression'].predict(X_input_scaled)[0]
             results['5. Regression'] = target_encoder.inverse_transform([pred])[0]
             
-            pred = models['Random Forest'].predict(X_input)[0]
-            results['6. Random Forest'] = target_encoder.inverse_transform([pred])[0]
+            # 6. Ensemble (Random Forest)
+            pred = models['Ensemble (Random Forest)'].predict(X_input)[0]
+            results['6. Ensemble (Random Forest)'] = target_encoder.inverse_transform([pred])[0]
             
+            # แสดงผล
             for model_name, prediction in results.items():
-                st.write(f"**{model_name}**: {prediction}")
+                if prediction in ['Good', 'Fair', 'Poor']:
+                    if prediction == 'Good':
+                        st.success(f"{model_name}: {prediction} - คุณภาพการนอนดี")
+                    elif prediction == 'Fair':
+                        st.warning(f"{model_name}: {prediction} - คุณภาพการนอนปานกลาง")
+                    else:
+                        st.error(f"{model_name}: {prediction} - คุณภาพการนอนแย่")
+                else:
+                    st.info(f"{model_name}: {prediction}")
             
+            # สรุปผล
+            st.markdown("---")
+            st.subheader("สรุปผลโดยรวม")
             predictions_list = [v for v in results.values() if v in ['Good', 'Fair', 'Poor']]
             if predictions_list:
                 most_common = max(set(predictions_list), key=predictions_list.count)
-                st.subheader("Summary")
-                st.write(f"Most common prediction: **{most_common}**")
+                if most_common == 'Good':
+                    st.success(f"ผลลัพธ์ส่วนใหญ่: Good - คุณภาพการนอนของคุณอยู่ในระดับดี")
+                elif most_common == 'Fair':
+                    st.warning(f"ผลลัพธ์ส่วนใหญ่: Fair - คุณภาพการนอนอยู่ในระดับปานกลาง ควรปรับปรุง")
+                else:
+                    st.error(f"ผลลัพธ์ส่วนใหญ่: Poor - คุณภาพการนอนอยู่ในระดับแย่ ควรปรับพฤติกรรม")
+        else:
+            st.error("โมเดลไม่พร้อมใช้งาน กรุณาตรวจสอบไฟล์โมเดล")
 
-elif page == "Models Info":
-    st.header("Machine Learning Models Information")
+# ==========================================
+# หน้า 3: ข้อมูลโมเดล
+# ==========================================
+elif page == "ข้อมูลโมเดล":
+    st.header("รายละเอียดโมเดล Machine Learning ทั้ง 6 ตัว")
+    st.markdown("---")
     
-    st.subheader("1. K-Nearest Neighbor (KNN)")
-    st.write("Classification algorithm that predicts based on the K nearest data points.")
+    st.subheader("1. K-nearest neighbor (KNN)")
+    st.write("""
+    KNN เป็นอัลกอริทึมที่ใช้หลักการ "บอกจากเพื่อนบ้าน" โดยจะดูว่าข้อมูลใหม่
+    อยู่ใกล้กับข้อมูลกลุ่มไหนมากที่สุด แล้วจัดให้อยู่ในกลุ่มนั้น
+    """)
     
     st.subheader("2. Decision Tree")
-    st.write("Tree-based model that splits data based on feature values to make predictions.")
+    st.write("""
+    Decision Tree ทำงานเหมือนการตัดสินใจแบบเป็นขั้นตอน (ถ้า...แล้ว...)
+    โดยจะแบ่งข้อมูลออกเป็นกิ่งก้านสาขาตามเงื่อนไขต่างๆ
+    """)
     
     st.subheader("3. SVM (Support Vector Machine)")
-    st.write("Finds the optimal hyperplane to separate different classes of data.")
+    st.write("""
+    SVM จะหาเส้นหรือระนาบที่ดีที่สุดในการแยกประเภทข้อมูลออกจากกัน
+    เหมาะกับข้อมูลที่ซับซ้อนและมีหลายมิติ
+    """)
     
-    st.subheader("4. K-Means Clustering")
-    st.write("Unsupervised learning algorithm that groups data into K clusters.")
+    st.subheader("4. K-mean Clustering")
+    st.write("""
+    K-mean เป็นอัลกอริทึมแบบ Unsupervised Learning ใช้สำหรับจัดกลุ่มข้อมูล
+    โดยแบ่งข้อมูลออกเป็น K กลุ่มตามความคล้ายคลึงกัน
+    """)
     
-    st.subheader("5. Logistic Regression")
-    st.write("Statistical model for binary and multi-class classification problems.")
+    st.subheader("5. Regression (Logistic Regression)")
+    st.write("""
+    Logistic Regression ใช้สำหรับทำนายผลลัพธ์ที่เป็นหมวดหมู่
+    โดยคำนวณความน่าจะเป็นของผลลัพธ์แต่ละประเภท
+    """)
     
-    st.subheader("6. Random Forest (Ensemble)")
-    st.write("Ensemble method combining multiple decision trees for better accuracy.")
+    st.subheader("6. Ensemble (Random Forest)")
+    st.write("""
+    Random Forest เป็นโมเดลแบบ Ensemble ที่นำ Decision Tree หลายๆ ต้นมารวมกัน
+    เพื่อลดความผิดพลาดและเพิ่มความแม่นยำในการทำนาย
+    """)
 
-elif page == "Developer":
-    st.header("Developer Information")
+# ==========================================
+# หน้า 4: ผู้พัฒนา
+# ==========================================
+elif page == "ผู้พัฒนา":
+    st.header("ข้อมูลผู้พัฒนา")
+    st.markdown("---")
     
     col1, col2 = st.columns([1, 2])
     
     with col1:
+        st.subheader("รูปภาพ")
         try:
-            st.image("profile.jpg", caption="Developer Photo", use_container_width=True)
+            st.image("profile.jpg", caption="รูปผู้พัฒนา", use_container_width=True)
         except:
-            st.write("Photo not found. Please upload profile.jpg")
+            st.warning("ไม่พบไฟล์รูปภาพ กรุณาอัปโหลดไฟล์ profile.jpg")
+            st.image("https://via.placeholder.com/300x300.png?text=Your+Photo", 
+                    caption="รูปตัวอย่าง", use_container_width=True)
     
     with col2:
-        st.subheader("Details")
-        st.write("**Student ID:** 6XXXXXXXXX")
-        st.write("**Name:** Your Name Here")
-        st.write("**Class Group:** Group XX")
-        st.write("**Email:** your.email@example.com")
+        st.subheader("รายละเอียด")
+        st.write("**รหัสนักศึกษา:** 6XXXXXXXXX")
+        st.write("**ชื่อ-นามสกุล:** นาย/นางสาว XXXXXXXXXX")
+        st.write("**หมู่เรียน:** หมู่เรียนที่ XX")
+        st.write("**อีเมล:** your.email@example.com")
     
-    st.subheader("About This Project")
-    st.write("This project uses machine learning to predict sleep quality based on lifestyle habits and doomscrolling behavior.")
+    st.markdown("---")
+    st.subheader("เกี่ยวกับโปรเจกต์")
+    st.write("""
+    โปรเจกต์นี้พัฒนาขึ้นเพื่อการศึกษาวิชา Machine Learning / Data Science
+    โดยนำข้อมูลพฤติกรรมการนอนและการใช้หน้าจอมาสร้างโมเดลทำนายคุณภาพการนอนหลับ
+    """)
+
+# Footer
+st.sidebar.markdown("---")
+st.sidebar.caption("ระบบทำนายคุณภาพการนอนหลับ")
